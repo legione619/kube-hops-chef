@@ -12,6 +12,7 @@ depends 'ndb'
 depends 'consul'
 
 
+
 recipe 'kube-hops::ca', 'Create and configure Kubernetes\'s CA'
 recipe 'kube-hops::master', 'Configure a node as Kubernetes master'
 recipe 'kube-hops::node', 'Configure a node as Kubernetes slave'
