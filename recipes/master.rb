@@ -44,8 +44,7 @@ template "#{node['kube-hops']['pki']['dir']}/kube-ca.cnf" do
   owner node['kube-hops']['user']
   group node['kube-hops']['group']
   variables ({
-    'master_cluster_ip': private_ip,
-    'master_hostname': node['fqdn']
+    'master_cluster_ip': private_ip
   })
 end
 
@@ -107,9 +106,10 @@ end
 components_conf = ['controller-manager', 'scheduler']
 components_conf.each do |component|
   kube_hops_conf component do
-    path        node['kube-hops']['conf_dir']
-    subject     "/CN=system:kube-#{component}"
-    master_ip   private_ip
+    path             node['kube-hops']['conf_dir']
+    subject          "/CN=system:kube-#{component}"
+    master_ip        private_ip
+    component        "system:kube-#{component}"
     not_if      { ::File.exist?("#{node['kube-hops']['conf_dir']}/#{component}.conf") }
   end
 end
@@ -119,6 +119,7 @@ kube_hops_conf "kubelet" do
   path        node['kube-hops']['conf_dir']
   subject     "/CN=system:node:#{node['fqdn']}/O=system:nodes"
   master_ip   private_ip
+  component   "system:node:#{node['fqdn']}"
   not_if      { ::File.exist?("#{node['kube-hops']['conf_dir']}/kubelet.conf") }
 end
 
@@ -127,6 +128,7 @@ kube_hops_conf "admin" do
   path        node['kube-hops']['conf_dir']
   subject     "/CN=kubernetes-admin/O=system:masters"
   master_ip   private_ip
+  component   "kubernetes-admin"
   not_if      { ::File.exist?("#{node['kube-hops']['conf_dir']}/admin.conf") }
 end
 
@@ -156,26 +158,6 @@ bash 'init-master' do
   only_if {Dir.empty?("#{node['kube-hops']['conf_dir']}/manifests") }
 end
 
-# On Centos we should replace the kubelet-flags.env and restart the kubelet daemon
-# so that kubelet get the correct cgroup configuration
-# This used to be done by the kubeadm tool, but apparently it's not working.
-if node['platform_family'].eql?("rhel")
-  centos_conf = "--runtime-cgroups=/systemd/system.slice --kubelet-cgroups=/systemd/system.slice"
-
-  template "#{node['kube-hops']['kubelet_dir']}/kubeadm-flags.env" do
-    source "kubeadm-flags.erb"
-    owner "root"
-    group "root"
-    mode "644"
-    variables ({
-      'centos_conf': centos_conf
-    })
-  end
-
-  service 'kubelet' do
-    action [:restart]
-  end
-end
 
 # Add configuration file in Kubernetes' user home to be able to access the cluster
 directory "/home/#{node['kube-hops']['user']}/.kube" do
@@ -240,26 +222,13 @@ kube_hops_kubectl 'apply_flannel' do
 end
 
 # Configure CoreDNS with user-specified fallback address
-template "/home/#{node['kube-hops']['user']}/coredns-configmap.yml" do
-  source "coredns-configmap.yml.erb"
+template "/home/#{node['kube-hops']['user']}/coredns.yml" do
+  source "coredns.yml.erb"
   owner node['kube-hops']['user']
   group node['kube-hops']['group']
   variables ({
     'fallback_dns': node['kube-hops']['fallback_dns'].eql?("") ? "8.8.8.8" : node['kube-hops']['fallback_dns']
   })
-end
-
-kube_hops_kubectl 'apply_coredns_config' do
-  user node['kube-hops']['user']
-  group node['kube-hops']['group']
-  url "/home/#{node['kube-hops']['user']}/coredns-configmap.yml"
-end
-
-# Configure CoreDNS to propagate /etc/hosts
-template "/home/#{node['kube-hops']['user']}/coredns.yml" do
-  source "coredns.yml.erb"
-  owner node['kube-hops']['user']
-  group node['kube-hops']['group']
 end
 
 kube_hops_kubectl 'apply_coredns' do
@@ -310,4 +279,27 @@ consul_service "Registering API server with Consul" do
   service_definition "consul/api-consul.hcl.erb"
   reload_consul false
   action :register
+end
+
+service_name='kubelet'
+service service_name do
+  action [:enable]
+end
+
+kagent_config service_name do
+  action :systemd_reload
+end
+
+
+if node['kagent']['enabled'] == "true"
+  kagent_config service_name do
+    service "kubernetes"
+    log_file ""
+  end
+end
+
+if conda_helpers.is_upgrade
+  kagent_config "#{service_name}" do
+    action :systemd_reload
+  end
 end

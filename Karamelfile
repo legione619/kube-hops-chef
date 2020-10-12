@@ -11,18 +11,16 @@ dependencies:
       - consul::slave
 # Wait also for Hopsworks::dev as it restarts the webserver and the CA won't work.
       - hopsworks::dev
-
   - recipe: kube-hops::node
     global:
       - kube-hops::master
 
-  - recipe: kube-hops::post_conf
+  - recipe: kube-hops::addons
     global:
       - kube-hops::node
       - kube-hops::master
-
-  - recipe: kube-hops::addons
-    global:
+      - hops::docker_registry
+# This is needed for 1.3
       - kube-hops::post_conf
 
 # Wait to run the hopsworks recipe after install

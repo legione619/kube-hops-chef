@@ -3,13 +3,12 @@ include_attribute "ndb"
 default['kube-hops']['user']                              = node['install']['user'].empty? ? "kubernetes" : node['install']['user']
 default['kube-hops']['group']                             = node['install']['user'].empty? ? "kubernetes" : node['install']['user']
 
-default['kube-hops']['cgroup-driver']                     = "systemd"
 default['kube-hops']['device']                            = ""
 
 # General cluster configuration
-default['kube-hops']['kubernetes_version']                = "v1.12.4"
-default['kube-hops']['kubernetes-cni_version']            = "0.6.0"
-default['kube-hops']['cri-tools_version']                 = "1.12.0"
+default['kube-hops']['kubernetes_version']                = "v1.18.8"
+default['kube-hops']['kubernetes-cni_version']            = "0.8.7"
+default['kube-hops']['cri-tools_version']                 = "1.13.0"
 default['kube-hops']['cluster_name']                      = "hops-kubernetes"
 default['kube-hops']['image_repo']                        = "k8s.gcr.io"
 
@@ -62,17 +61,10 @@ default['kube-hops']['hopsworks_cert_pwd']                 = "adminpw"
 
 # Images configuration
 
-default['kube-hops']['registry']                           = "registry.docker-registry.svc.#{node['kube-hops']['cluster_domain']}"
-default['kube-hops']['pull_policy']                        = "IfNotPresent"
+default['kube-hops']['pull_policy']                        = "Always"
 
 default['kube-hops']['docker_dir']                         = node['install']['dir'].empty? ? "/var/lib/docker" : "#{node['install']['dir']}/docker"
 
-default['kube-hops']['docker_img_version']                 = node['install']['version'].gsub("-SNAPSHOT", "")
+default['kube-hops']['docker_img_version']                 = "1.4.1"
 default['kube-hops']['docker_img_tar_url']                 = node['download_url'] + "/kube/docker-images/#{node['kube-hops']['docker_img_version']}/docker-images.tar"
 default['kube-hops']['docker_img_reg_url']                 = ""
-
-default['kube-hops']['imgs']['tf']['version']              = default['kube-hops']['docker_img_version']
-default['kube-hops']['imgs']['sklearn']['version']         = default['kube-hops']['docker_img_version']
-default['kube-hops']['imgs']['filebeat']['version']        = default['kube-hops']['docker_img_version']
-default['kube-hops']['imgs']['jupyter']['version']         = default['kube-hops']['docker_img_version']
-default['kube-hops']['imgs']['python']['version']          = default['kube-hops']['docker_img_version']
