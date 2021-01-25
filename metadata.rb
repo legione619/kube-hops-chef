@@ -3,7 +3,7 @@ maintainer              'Logical Clocks AB'
 maintainer_email        'fabio@logicalclocks.com'
 license                 ''
 description             'Installs/Configures kube-hops-chef'
-version                 '1.4.0'
+version                 '2.0.0'
 
 cookbook 'sysctl', '~> 1.0.3'
 cookbook 'kernel_module', '~> 1.1.1'
@@ -19,6 +19,11 @@ recipe 'kube-hops::node', 'Configure a node as Kubernetes slave'
 recipe 'kube-hops::addons', 'Deploy addons on the cluster'
 recipe 'kube-hops::hopsworks', 'Configure Hopsworks to use Kubernetes'
 
+
+
+attribute "kube-hops/hopsworks_user",
+          :description =>  "The user the hopsworks web-app used to authenticate to Kubernetes",
+          :type => 'string'
 
 attribute "kube-hops/device",
           :description =>  "Device plugin to configure for master and nodes, for no device set '' or 'nvidia' for NVIDIA GPUs",
