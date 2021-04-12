@@ -3,7 +3,7 @@ maintainer              'Logical Clocks AB'
 maintainer_email        'fabio@logicalclocks.com'
 license                 ''
 description             'Installs/Configures kube-hops-chef'
-version                 '2.1.0'
+version                 '2.2.0'
 
 cookbook 'sysctl', '~> 1.0.3'
 cookbook 'kernel_module', '~> 1.1.1'
@@ -11,14 +11,17 @@ depends 'kagent'
 depends 'ndb'
 depends 'consul'
 depends 'hops'
-
+depends 'magic_shell', '~> 1.0.0'
+depends 'hopslog'
 
 recipe 'kube-hops::ca', 'Create and configure Kubernetes\'s CA'
 recipe 'kube-hops::master', 'Configure a node as Kubernetes master'
 recipe 'kube-hops::node', 'Configure a node as Kubernetes slave'
 recipe 'kube-hops::addons', 'Deploy addons on the cluster'
 recipe 'kube-hops::hopsworks', 'Configure Hopsworks to use Kubernetes'
-
+recipe 'kube-hops::kfserving', 'Configure and install KFServing (istio, knative, ...) on Kubernetes'
+recipe 'kube-hops::filebeat', 'Configure and install Filebeat for model server logging on Kubernetes'
+recipe 'kube-hops::hops-system', 'Create and configure Hops-system namespace in Kubernetes for configuration and core components'
 
 
 attribute "kube-hops/hopsworks_user",
@@ -155,4 +158,12 @@ attribute "kube-hops/docker_cores_fraction",
 
 attribute "kube-hops/docker_max_gpus_allocation",
           :description =>  "Maximum number of GPUs that can be allocated for Docker containers",
+          :type => 'string'
+
+attribute "kube-hops/kfserving/enabled",
+          :description =>  "Default true. Set to 'false' to disable kfserving",
+          :type => 'string'
+
+attribute "kube-hops/kfserving/img_tar_url",
+          :description =>  "Remote container images registry from which to fetch the kfserving and dependencies images",
           :type => 'string'
