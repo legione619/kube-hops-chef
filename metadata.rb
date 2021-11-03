@@ -3,7 +3,7 @@ maintainer              'Logical Clocks AB'
 maintainer_email        'fabio@logicalclocks.com'
 license                 ''
 description             'Installs/Configures kube-hops-chef'
-version                 '2.3.0'
+version                 '2.4.0'
 
 cookbook 'sysctl', '~> 1.0.3'
 cookbook 'kernel_module', '~> 1.1.1'
@@ -24,6 +24,21 @@ recipe 'kube-hops::kfserving', 'Configure and install KFServing (istio, knative,
 recipe 'kube-hops::filebeat', 'Configure and install Filebeat for model server logging on Kubernetes'
 recipe 'kube-hops::hops-system', 'Create and configure Hops-system namespace in Kubernetes for configuration and core components'
 
+attribute "kube-hops/user",
+          :description =>  "The user running Kubernetes",
+          :type => 'string'
+
+attribute "kube-hops/user_id",
+          :description =>  "Kubernetes user id. Default: 1523",
+          :type => 'string'
+
+attribute "kube-hops/group",
+          :description =>  "Group of the user running Kubernetes",
+          :type => 'string'
+
+attribute "kube-hops/group_id",
+          :description =>  "Kubernetes group id. Default: 1518",
+          :type => 'string'
 
 attribute "kube-hops/hopsworks_user",
           :description =>  "The user the hopsworks web-app used to authenticate to Kubernetes",
@@ -63,6 +78,14 @@ attribute "kube-hops/cluster_domain",
 
 attribute "kube-hops/hostname_override",
           :description =>  "Flag to force Kubernetes use FQDN of host as node name. Default: true",
+          :type => 'string'
+
+attribute "kube-hops/taints",
+          :description =>  "A list of node,taints in the format:  (node1,taint)(node2,taint)",
+          :type => 'string'
+
+attribute "kube-hops/labels",
+          :description =>  "A list of node,labels in the format:  (node1,label)(node2,label)",
           :type => 'string'
 
 attribute "kube-hops/apiserver/port",
@@ -167,4 +190,12 @@ attribute "kube-hops/kfserving/enabled",
 
 attribute "kube-hops/kfserving/img_tar_url",
           :description =>  "Remote container images registry from which to fetch the kfserving and dependencies images",
+          :type => 'string'
+
+attribute "kube-hops/serving_node_labels",
+          :description =>  "The labels used for node selection in model serving pods, in the format key1=value1,key2=value2",
+          :type => 'string'
+
+attribute "kube-hops/serving_node_tolerations",
+          :description =>  "The tolerations attached to model serving pods, in the format key1:operator1[:value1]:effect1,key2:operator2[:value2]:effect2",
           :type => 'string'

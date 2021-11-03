@@ -1,7 +1,9 @@
 include_attribute "ndb"
 
 default['kube-hops']['user']                              = node['install']['user'].empty? ? "kubernetes" : node['install']['user']
+default['kube-hops']['user_id']                           = '1523'
 default['kube-hops']['group']                             = node['install']['user'].empty? ? "kubernetes" : node['install']['user']
+default['kube-hops']['group_id']                          = '1518'
 default['kube-hops']['hopsworks_user']                    = "hopsworks"
 default['kube-hops']['dir']                               = (node['install']['dir'].empty? ? "/srv" : node['install']['dir']) + "/kube"
 default['kube-hops']['user-home']                         = "/home/#{node['kube-hops']['user']}"
@@ -22,10 +24,10 @@ default['kube-hops']['bin']['download_url']               = "#{node['download_ur
 
 
 # Resource allocation configuration
-default['kube-hops']['docker_max_memory_allocation'] = "8192"
-default['kube-hops']['docker_max_cores_allocation']  = "4"
-default['kube-hops']['docker_cores_fraction']        = "1.0"
-default['kube-hops']['docker_max_gpus_allocation']   = "0"
+default['kube-hops']['docker_max_memory_allocation']      = "8192"
+default['kube-hops']['docker_max_cores_allocation']       = "4"
+default['kube-hops']['docker_cores_fraction']             = "1.0"
+default['kube-hops']['docker_max_gpus_allocation']        = "0"
 
 # Network configuration
 default['kube-hops']['cidr']                              = "10.244.0.0/16"
@@ -34,6 +36,10 @@ default['kube-hops']['fallback_dns']                      = ""
 default['kube-hops']['flannel']['iface-regex']            = ""
 default['kube-hops']['cluster_domain']                    = "cluster.local"
 default['kube-hops']['hostname_override']                 = "true"
+
+# Nodes configuration
+default['kube-hops']['taints']                            = ""
+default['kube-hops']['labels']                            = ""
 
 # Apiserver
 default['kube-hops']['apiserver']['port']                 = "6443"
@@ -63,7 +69,6 @@ default['kube-hops']['pki']['verify_hopsworks_cert']       = "true"
 default['kube-hops']['hopsworks_cert_pwd']                 = "adminpw"
 
 # Images configuration
-
 default['kube-hops']['pull_policy']                        = "Always"
 
 default['kube-hops']['docker_dir']                         = node['install']['dir'].empty? ? "/var/lib/docker" : "#{node['install']['dir']}/docker"
@@ -84,7 +89,7 @@ default['kube-hops']['docker_img_reg_url']                 = ""
 default['kube-hops']['kfserving']['enabled']               = node['install']['kubernetes']
 default['kube-hops']['kfserving']['version']               = "0.5.1"
 default['kube-hops']['kfserving']['base_dir']              = node['kube-hops']['dir'] + "/kfserving"
-default['kube-hops']['kfserving']['img_tar_url']           = node['download_url'] + "/kube/kfserving/kfserving-v#{node['kube-hops']['kfserving']['version']}.tgz"
+default['kube-hops']['kfserving']['img_tar_url']           = node['download_url'] + "/kube/kfserving/#{node['install']['version']}/kfserving-v#{node['kube-hops']['kfserving']['version']}.tgz"
 
 # Istio
 
@@ -113,6 +118,10 @@ default['kube-hops']['hops-system']['base_dir']            = node['kube-hops']['
 default['kube-hops']['model-serving-webhook']['base_dir']  = node['kube-hops']['hops-system']['base_dir'] + "/model-serving-webhook"
 default['kube-hops']['model-serving-webhook']['image']     = "model-serving-webhook:#{node['kube-hops']['docker_img_version']}"
 default['kube-hops']['storage-initializer']['image']       = "storage-initializer:#{node['kube-hops']['docker_img_version']}"
+
+# Model serving deployment configuration
+default['kube-hops']['serving_node_labels']                = ""
+default['kube-hops']['serving_node_tolerations']           = ""
 
 # Inference logger
 
