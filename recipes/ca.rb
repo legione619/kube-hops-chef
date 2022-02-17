@@ -104,9 +104,10 @@ bash 'create-and-sign-key' do
 	  chmod 440 #{kube_private}/kube-ca.key.pem
 
     # Generate CSR
-    [ -f #{kube_csr}/kube-ca.csr.pem ] || openssl req -new -sha256 -subj "/C=SE/ST=Sweden/L=Stockholm/O=LogicalClocks/CN=KubeHopsIntermediateCA" \
+#    [ -f #{kube_csr}/kube-ca.csr.pem ] || openssl req -new -sha256 -subj "/C=SE/ST=Sweden/L=Stockholm/O=LogicalClocks/CN=KubeHopsIntermediateCA" \
+#      -key #{kube_private}/kube-ca.key.pem -passin pass:${KEYPW} -passout pass:${KEYPW} -out #{kube_csr}/kube-ca.csr.pem
+    [ -f #{kube_csr}/kube-ca.csr.pem ] || openssl req -new -sha256 -subj ""/C=IT/ST=Italia/L=Roma/O=Almaviva S.P.A./CN=KubeDataPlatformIntermediateCA" \
       -key #{kube_private}/kube-ca.key.pem -passin pass:${KEYPW} -passout pass:${KEYPW} -out #{kube_csr}/kube-ca.csr.pem
-
     # Sign CSR
     [ -f #{kube_certs}/kube-ca.cert.pem ] || openssl ca -batch -config ../openssl-ca.cnf -extensions v3_intermediate_ca \
       -days 3650 -notext -md sha256 -passin pass:${MASTERKEYPW} -in #{kube_csr}/kube-ca.csr.pem -out #{kube_certs}/kube-ca.cert.pem
@@ -138,7 +139,7 @@ bash 'generate-and-sign-key' do
     openssl genrsa -passout pass:#{node['kube-hops']['hopsworks_cert_pwd']} -out hopsworks.key.pem #{node['kube-hops']['pki']['keysize']}
     chmod 400 hopsworks.key.pem
     chown #{node['kube-hops']['pki']['ca_api_user']} hopsworks.key.pem
-    openssl req -subj "/CN=hopsworks" -passin pass:#{node['kube-hops']['hopsworks_cert_pwd']} -passout pass:#{node['kube-hops']['hopsworks_cert_pwd']} -key hopsworks.key.pem -new -sha256 -out hopsworks.csr.pem
+    openssl req -subj "/CN=dataplatform" -passin pass:#{node['kube-hops']['hopsworks_cert_pwd']} -passout pass:#{node['kube-hops']['hopsworks_cert_pwd']} -key hopsworks.key.pem -new -sha256 -out hopsworks.csr.pem
     openssl ca -batch -config ../kube-ca.cnf -passin pass:#{node['kube-hops']['pki']['ca_keypw']} -extensions v3_ext -days 365 -notext -md sha256 -in hopsworks.csr.pem -out hopsworks.cert.pem
     chmod 400 hopsworks.cert.pem
     chown #{node['kube-hops']['pki']['ca_api_user']} hopsworks.cert.pem
